@@ -5,6 +5,7 @@
 import time
 import sys
 import os
+import re
 from bs4 import BeautifulSoup
 import urllib.request
 import urllib.error
@@ -90,11 +91,10 @@ elif 'REMOTE_ADDR' in os.environ.keys():
 else:  
     ip = ""
     
-#print (g_response)
 soup = BeautifulSoup(g_read)
 stats = soup.find('div', attrs={"id":"resultStats"})
-items = soup.findAll('h3', attrs={"class":"r"})
-items_desc = soup.findAll('span', attrs={"class":"st"})
+g_group = soup.find('div', attrs={"class":"srg"})
+g_items = g_group.findAll('li', attrs={"class":"g"})
 navs = soup.find('table', attrs={"id":"nav"})
 
 if ip:
@@ -107,7 +107,7 @@ else:
     """ % (search_keywords, stats.text)
 
 db = SearchDB()
-db.db_insert(search_keywords, ip)
+db.db_insert_search(ip, search_keywords)
 #db.db_dump()
 #db.db_statistics()
 
@@ -117,19 +117,31 @@ print(htmls_search)
 print(htmls_body1)
 print ('<h4>搜索结果:</h4>')
 
-if len(items) != len(items_desc):
-    items_desc = items_desc[-len(items):]
 
-for item, item_desc in zip(items, items_desc):
-    print ( '<div class="content_items">' )
-    print ( '<span style="font-size:16px"><a href=' + item.a["href"] + '>' + item.a.text + '</a></span>')
-    print ( '<br />' )
-    print ( '<span>' + item.a['href']+ '</span>')
-    print ( '<br />' )
-    print ( '<span>' + item_desc.text + '</span>')
-    print ( '<br />' )
-    print ( '<br />' )
-    print ( '</div>' )
+#for item, item_desc in zip(items, items_desc):
+for g_item in g_items:
+    if g_item:
+        item = g_item.find('h3', attrs={"class":"r"})
+        item_desc = g_item.find('span', attrs={"class":"st"})
+        item_caches = g_item.findAll('li', attrs={"class":"action-menu-item ab_dropdownitem"})
+        print ( '<div class="g_content_items">' )
+        print ( '<span style="font-size:16px"><a href=' + item.a["href"] + '>' + item.a.text + '</a></span>')
+        print ( '<br />' )
+        print ( '<span>' + item.a['href']+ '</span>')
+        print ( '<br />' )
+        print ( '<span> <a style="font-size:16px" target="_blank" href="https://192.3.90.124/cache.py?url=' + item.a["href"] + '"> 页面快照&nbsp;</a></span>')
+        if item_caches:
+            for i_cache in item_caches:
+                # Here, because we can not access http://webcache.googleusercontent.com/ until
+                # we crack there anti-robot ...
+                if i_cache:
+                    if not re.match(r'^(http|https)://',i_cache.a["href"]) and re.match(r'^/search?',i_cache.a["href"]):
+                        print ('<span><a style="font-size:16px" href=' + repr(i_cache.a["href"])+'>' + '&nbsp;类似结果&nbsp;' + '</a></span>')
+        print ( '<br />' )
+        print ( '<span>' + item_desc.text + '</span>')
+        print ( '<br />' )
+        print ( '<br />' )
+        print ( '</div>' )
     
 if navs:
     tabs = navs.findAll('td')

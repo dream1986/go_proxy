@@ -33,6 +33,7 @@ class SearchDB:
                         create table if not exists search_info(
                         id integer primary key autoincrement, 
                         search_keys varchar(256) DEFAULT NULL,
+                        cache_urls  varchar(256) DEFAULT NULL,
                         host_ipaddr varchar(20)  DEFAULT NULL,
                         search_time varchar(50)  DEFAULT NULL
                         );'''
@@ -43,8 +44,8 @@ class SearchDB:
         finally:
             conn.close()
     
-    def db_insert(self, search_keys, host_ipaddr):
-        sql_insert_data = '''insert into search_info(search_keys, host_ipaddr, search_time) values ('%s', '%s', '%s')'''%(search_keys, host_ipaddr, current_time())
+    def do_db_insert(self, host_ipaddr, search_keys, cache_url):
+        sql_insert_data = '''insert into search_info(search_keys, cache_urls, host_ipaddr, search_time) values ('%s', '%s', '%s', '%s')'''%(search_keys, cache_url, host_ipaddr, current_time())
         try:
             conn = sqlite3.connect(self.db_file,  timeout = 2000,  check_same_thread = False)
             total = conn.execute(sql_insert_data)
@@ -54,7 +55,12 @@ class SearchDB:
             print ('-2--'+str(e)+'--')
         finally:
             conn.close()
-    
+            
+    def db_insert_search(self, host_ipaddr, search_keys):
+        self.do_db_insert(host_ipaddr, search_keys, "")
+        
+    def db_insert_cache(self, host_ipaddr, cache_url):
+        self.do_db_insert(host_ipaddr, "", cache_url)
             
     def db_dump(self):
         sql_dump_data = '''select * from search_info'''
@@ -62,7 +68,7 @@ class SearchDB:
             conn = sqlite3.connect(self.db_file, timeout = 2000,  check_same_thread = False)
             cursor = conn.execute(sql_dump_data)
             for row in cursor:
-                print (row[0],row[1],row[2],row[3])
+                print (row[0],row[1],row[2],row[3],row[4])
         except Exception as e:
             print ('-3--'+str(e)+'--')
         finally:
@@ -78,4 +84,4 @@ class SearchDB:
             print ('-4--'+str(e)+'--')
         finally:
             conn.close()
-        print("总访问记录数：%d" % total)
+        print("总访问记录总数：%d" % total)

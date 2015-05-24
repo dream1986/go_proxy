@@ -9,3 +9,8 @@ SetEnv PYTHONIOENCODING utf-8
 
 TODO：
 增加拣取谷歌快照的功能，这还是比较重要的。
+
+20150524
+缓存和类似搜索弄好了。加了个装逼的Logo ( by funny google)
+google的缓存没法开放抓取，有机器人监控，所以就直接原始网址抓取了。
+还有部分网页的编码有问题，有待解决。
