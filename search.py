@@ -39,6 +39,20 @@ htmls_head = """
 <body>
 """
 
+htmls_style = """
+<style type="text/css"> 
+<!-- 
+.g_content_items {   
+    font-family: tahoma, 'microsoft yahei', 微软雅黑;
+}
+
+em {
+    color: red
+}
+--> 
+</style> 
+"""
+
 htmls_search_e = """
 <form action="/search.py" method="GET" align=left>
     <span style="font-size:17px"><a href="./index.htm">回到首页</a></span>
@@ -113,6 +127,7 @@ db.db_insert_search(ip, search_keywords)
 
 
 print(htmls_head)
+print(htmls_style)
 print(htmls_search)
 print(htmls_body1)
 print ('<h4>搜索结果:</h4>')
@@ -138,7 +153,7 @@ for g_item in g_items:
                     if not re.match(r'^(http|https)://',i_cache.a["href"]) and re.match(r'^/search?',i_cache.a["href"]):
                         print ('<span><a style="font-size:16px" href=' + repr(i_cache.a["href"])+'>' + '&nbsp;类似结果&nbsp;' + '</a></span>')
         print ( '<br />' )
-        print ( '<span>' + item_desc.text + '</span>')
+        print ( item_desc )
         print ( '<br />' )
         print ( '<br />' )
         print ( '</div>' )
